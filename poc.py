@@ -48,9 +48,9 @@ class POC():
                             for shii in shit:
                                 payload = os.urandom(500)
                                 await client.write_gatt_char(char_specifier=shii, data=payload, response=False)
-                                print(f"Fuzz: {payload.hex()} --> {shii}")
+                                print(f"Fuzz: {payload.hex()} --> {shii}")                                
 
-                        
+
 
                         if not t: return
 
